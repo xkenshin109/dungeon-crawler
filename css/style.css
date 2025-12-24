@@ -1,0 +1,417 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --terminal-bg: #0a0a0a;
+    --terminal-green: #00ff00;
+    --terminal-green-dim: #00aa00;
+    --terminal-amber: #ffb000;
+    --terminal-border: #333;
+    --menu-bg: #0d0d0d;
+    --menu-hover: #1a2a1a;
+    --menu-selected: #0a3a0a;
+    --scanline-opacity: 0.05;
+}
+
+body {
+    background: #000;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'VT323', 'Courier New', monospace;
+    padding: 20px;
+}
+
+#terminal {
+    width: 100%;
+    max-width: 1100px;
+    height: 85vh;
+    min-height: 500px;
+    background: var(--terminal-bg);
+    border: 2px solid var(--terminal-green-dim);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 0 20px rgba(0, 255, 0, 0.2),
+        inset 0 0 100px rgba(0, 255, 0, 0.05);
+}
+
+/* Scanline effect */
+#terminal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* CRT flicker effect */
+#terminal::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 255, 0, 0.02);
+    pointer-events: none;
+    z-index: 11;
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% { opacity: 0.97; }
+    50% { opacity: 1; }
+    100% { opacity: 0.98; }
+}
+
+#terminal-header {
+    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+    border-bottom: 1px solid var(--terminal-green-dim);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+#terminal-header .title {
+    color: var(--terminal-green);
+    font-size: 24px;
+    text-shadow: 0 0 10px var(--terminal-green);
+    letter-spacing: 4px;
+}
+
+#terminal-header .subtitle {
+    color: var(--terminal-green-dim);
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+/* Split Panel Layout */
+#terminal-main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Left Panel - Menu */
+#menu-panel {
+    width: 250px;
+    min-width: 250px;
+    background: var(--menu-bg);
+    border-right: 1px solid var(--terminal-green-dim);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#menu-header {
+    padding: 12px 15px;
+    color: var(--terminal-amber);
+    font-size: 16px;
+    letter-spacing: 2px;
+    border-bottom: 1px solid var(--terminal-border);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+#menu-options {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 0;
+}
+
+.menu-option {
+    padding: 10px 15px;
+    color: var(--terminal-green);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.1s, color 0.1s;
+    border-left: 3px solid transparent;
+}
+
+.menu-option .option-number {
+    color: var(--terminal-amber);
+    min-width: 24px;
+    font-size: 16px;
+}
+
+.menu-option .option-text {
+    flex: 1;
+}
+
+.menu-option .option-hint {
+    color: var(--terminal-green-dim);
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+/* Hover state */
+.menu-option:hover {
+    background: var(--menu-hover);
+    border-left-color: var(--terminal-green-dim);
+}
+
+/* Selected state (keyboard navigation) */
+.menu-option.selected {
+    background: var(--menu-selected);
+    border-left-color: var(--terminal-green);
+    color: #ffffff;
+    text-shadow: 0 0 5px var(--terminal-green);
+}
+
+.menu-option.selected .option-number {
+    color: #ffffff;
+}
+
+/* Disabled state */
+.menu-option.disabled {
+    color: var(--terminal-green-dim);
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.menu-option.disabled:hover {
+    background: transparent;
+    border-left-color: transparent;
+}
+
+/* Menu category separator */
+.menu-separator {
+    height: 1px;
+    background: var(--terminal-border);
+    margin: 8px 15px;
+}
+
+.menu-category {
+    padding: 8px 15px 4px;
+    color: var(--terminal-green-dim);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+#menu-footer {
+    padding: 10px 15px;
+    border-top: 1px solid var(--terminal-border);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+#menu-footer .hint {
+    color: var(--terminal-green-dim);
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* Right Panel - Split View */
+#right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Map Panel (Top) */
+#map-panel {
+    height: 45%;
+    min-height: 200px;
+    background: rgba(0, 10, 0, 0.5);
+    border-bottom: 1px solid var(--terminal-green-dim);
+    position: relative;
+    overflow: hidden;
+}
+
+#map-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Output Panel (Bottom) */
+#output-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px 20px;
+}
+
+#output {
+    color: var(--terminal-green);
+    font-size: 18px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+#output .line {
+    margin-bottom: 2px;
+}
+
+#output .system {
+    color: var(--terminal-amber);
+}
+
+#output .error {
+    color: #ff4444;
+}
+
+#output .success {
+    color: #44ff44;
+}
+
+#output .highlight {
+    color: #ffffff;
+    text-shadow: 0 0 5px #ffffff;
+}
+
+#output .dim {
+    color: var(--terminal-green-dim);
+}
+
+#output .command-echo {
+    color: var(--terminal-green-dim);
+    opacity: 0.7;
+}
+
+/* Input Panel */
+#terminal-input {
+    background: #0f0f0f;
+    border-top: 1px solid var(--terminal-green-dim);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+#terminal-input.hidden {
+    display: none;
+}
+
+#terminal-input .prompt {
+    color: var(--terminal-green);
+    font-size: 20px;
+    text-shadow: 0 0 5px var(--terminal-green);
+}
+
+#terminal-input input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--terminal-green);
+    font-family: inherit;
+    font-size: 18px;
+    caret-color: var(--terminal-green);
+}
+
+#terminal-input input::placeholder {
+    color: var(--terminal-green-dim);
+    opacity: 0.5;
+}
+
+#terminal-input input:disabled {
+    opacity: 0.3;
+}
+
+/* Scrollbar styling */
+#output-panel::-webkit-scrollbar,
+#menu-options::-webkit-scrollbar {
+    width: 8px;
+}
+
+#output-panel::-webkit-scrollbar-track,
+#menu-options::-webkit-scrollbar-track {
+    background: var(--terminal-bg);
+}
+
+#output-panel::-webkit-scrollbar-thumb,
+#menu-options::-webkit-scrollbar-thumb {
+    background: var(--terminal-green-dim);
+    border-radius: 4px;
+}
+
+#output-panel::-webkit-scrollbar-thumb:hover,
+#menu-options::-webkit-scrollbar-thumb:hover {
+    background: var(--terminal-green);
+}
+
+/* Blinking cursor animation for input */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ASCII art styling */
+.ascii-art {
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+/* Progress bar styling */
+.progress-bar {
+    display: inline-block;
+}
+
+.progress-filled {
+    color: var(--terminal-green);
+}
+
+.progress-empty {
+    color: var(--terminal-green-dim);
+    opacity: 0.3;
+}
+
+/* Separator line */
+.separator {
+    color: var(--terminal-green-dim);
+    opacity: 0.5;
+}
+
+/* Sub-menu styling (for nested choices like districts) */
+.menu-option.submenu {
+    padding-left: 30px;
+    font-size: 16px;
+}
+
+.menu-option.back {
+    color: var(--terminal-amber);
+    font-style: italic;
+}
+
+/* Status indicator in menu */
+.menu-status {
+    padding: 10px 15px;
+    font-size: 14px;
+    color: var(--terminal-green-dim);
+    border-bottom: 1px solid var(--terminal-border);
+}
+
+.menu-status .status-label {
+    opacity: 0.7;
+}
+
+.menu-status .status-value {
+    color: var(--terminal-green);
+}
